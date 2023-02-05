@@ -1,0 +1,82 @@
+---
+ - name: deploy apache2 on host server[remote]
+   hosts: servers
+   become: true 
+   become_user: root
+ 
+   tasks:
+     - name: Update all packages to their latest version
+       ansible.builtin.apt:
+         name: "*"
+         state: latest
+         update_cache: yes
+ 
+     - name: Install Apache server/PHP/Apache-PHP-module
+       ansible.builtin.apt:
+         name: 
+         - apache2
+         - php
+         - libapache2-mod-php
+         state: latest
+ 
+     - name: "Remove useless packages from the cache & dependencies that are no longer required"
+       ansible.builtin.apt:
+         autoclean: yes
+         autoremove: yes
+ 
+     - name: Start/restart service apache2, if not started
+       ansible.builtin.systemd:
+         name: apache2
+         enabled: yes
+         state: restarted
+ 
+     - name: set timezone to Africa/Lagos
+       timezone:
+         name: Africa/Lagos
+ 
+     - name: Copy my "index.php" file to the host server[remote]
+       ansible.builtin.copy:
+         src: index.php
+         dest: /var/www/html/index.php
+         remote_src: no
+
+ - name: deploy apache2 on vagrant slave [local]
+   hosts: vagrant
+   become: true
+   become_user: root
+
+   tasks:
+     - name: Update all packages to their latest version
+       ansible.builtin.apt:
+         name: "*"
+         state: latest
+         update_cache: yes
+
+     - name: Install Apache server/PHP/Apache-PHP-module
+       ansible.builtin.apt:
+         name:
+         - apache2
+         - php
+         - libapache2-mod-php
+         state: latest
+
+     - name: "Remove useless packages from the cache & dependencies that are no longer required"
+       ansible.builtin.apt:
+         autoclean: yes
+         autoremove: yes
+
+     - name: Start/restart service apache2, if not started
+       ansible.builtin.systemd:
+         name: apache2
+         enabled: yes
+         state: restarted
+
+     - name: set timezone to Africa/Lagos
+       timezone:
+         name: Africa/Lagos
+
+     - name: Copy my "index.php" file to vagrant slave [local]
+       ansible.builtin.copy:
+         src: index.php
+         dest: /var/www/html/index.php
+         remote_src: no
