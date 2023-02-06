@@ -10,13 +10,30 @@
          name: "*"
          state: latest
          update_cache: yes
+
+     - name: ufw enabled
+       community.general.ufw:
+         state: "enabled"
+         policy: "deny"
+         logging: "on"
+
+     - name: ufw rules
+       community.general.ufw:
+         rule: "allow"
+         port: "{{ item }}"
+         proto: "tcp"
+       with_items:
+         - "22"
+         - "80"
+         - "443"
  
-     - name: Install Apache server/PHP/Apache-PHP-module
+     - name: Install Apache server/PHP/Apache-PHP-module/net-tools
        ansible.builtin.apt:
          name: 
          - apache2
          - php
          - libapache2-mod-php
+         - net-tools
          state: latest
  
      - name: "Remove useless packages from the cache & dependencies that are no longer required"
@@ -40,8 +57,8 @@
          dest: /var/www/html/index.php
          remote_src: no
 
- - name: deploy apache2 on vagrant slave [local]
-   hosts: vagrant
+ - name: deploy apache2 on servers
+   hosts: servers
    become: true
    become_user: root
 
@@ -65,18 +82,24 @@
          autoclean: yes
          autoremove: yes
 
+     - name: set timezone to Africa/Lagos
+       timezone:
+         name: Africa/Lagos
+
+     - name: Copy my "index.php" file to server
+       ansible.builtin.copy:
+         src: index.php
+         dest: /var/www/html/index.php
+         remote_src: no
+
+     - name: Copy my "myapp.conf" file to server
+       ansible.builtin.copy:
+         src: myapp.conf
+         dest: /etc/apache2/sites-available/myapp.conf
+         remote_src: no
+
      - name: Start/restart service apache2, if not started
        ansible.builtin.systemd:
          name: apache2
          enabled: yes
          state: restarted
-
-     - name: set timezone to Africa/Lagos
-       timezone:
-         name: Africa/Lagos
-
-     - name: Copy my "index.php" file to vagrant slave [local]
-       ansible.builtin.copy:
-         src: index.php
-         dest: /var/www/html/index.php
-         remote_src: no

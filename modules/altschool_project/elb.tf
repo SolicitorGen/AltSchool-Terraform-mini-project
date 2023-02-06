@@ -42,22 +42,11 @@ resource "aws_lb_listener" "altschool-listener" {
  }
 }
 
-# creating server2
-# resource "aws_instance" "altschool-server2" {
-#   ami             = "ami-00874d747dde814fa"
-#   instance_type   = "t2.micro"
-#   key_name        = "altschool-terraform-project-key"
-#   security_groups = [aws_security_group.altschool-ec2-security-grp-rule.id]
-#   subnet_id       = aws_subnet.altschool-public-subnet2.id
-#   availability_zone = "us-east-1b"
-# }
+# Registering instances to target group
+resource "aws_lb_target_group_attachment" "target_group_attachment" {
+  target_group_arn = aws_lb_target_group.altschool-target-group.arn
+  count = length(aws_instance.altschool-server.*)
+  target_id        = aws_instance.altschool-server[count.index].id
+  port             = 80
+}
 
-# # creating server3
-# resource "aws_instance" "altschool-server3" {
-#   ami             = "ami-00874d747dde814fa"
-#   instance_type   = "t2.micro"
-#   key_name        = "altschool-terraform-project-key"
-#   security_groups = [aws_security_group.altschool-ec2-security-grp-rule.id]
-#   subnet_id       = aws_subnet.altschool-public-subnet3.id
-#   availability_zone = "us-east-1c"
-# }
