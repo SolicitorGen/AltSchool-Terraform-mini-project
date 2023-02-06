@@ -57,40 +57,11 @@
          dest: /var/www/html/index.php
          remote_src: no
 
- - name: deploy apache2 on servers
-   hosts: servers
-   become: true
-   become_user: root
-
-   tasks:
-     - name: Update all packages to their latest version
-       ansible.builtin.apt:
-         name: "*"
-         state: latest
-         update_cache: yes
-
-     - name: Install Apache server/PHP/Apache-PHP-module
-       ansible.builtin.apt:
-         name:
-         - apache2
-         - php
-         - libapache2-mod-php
-         state: latest
-
-     - name: "Remove useless packages from the cache & dependencies that are no longer required"
-       ansible.builtin.apt:
-         autoclean: yes
-         autoremove: yes
-
-     - name: set timezone to Africa/Lagos
-       timezone:
-         name: Africa/Lagos
-
-     - name: Copy my "index.php" file to server
-       ansible.builtin.copy:
-         src: index.php
-         dest: /var/www/html/index.php
-         remote_src: no
+     - name: Remove index.html file 
+       ansible.builtin.file:
+         path: /var/www/html/index.html
+         state: absent
+         mode: u+rw,g-wx,o-rwx
 
      - name: Copy my "myapp.conf" file to server
        ansible.builtin.copy:
